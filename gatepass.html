@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gate Pass</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<style >
+     .header {
+    text-align: center;
+    padding: 0px; 
+    background-color: #333; 
+    color: white; 
+  }
+.form-container {
+  max-width: 600px; 
+  height: 500px ;
+  margin: 0 auto; 
+  padding: 20px; 
+  border: 1px solid #ccc; 
+  border-radius: 5px; 
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); 
+  background-color: #f9f9f9; 
+}
+
+/* Split the screen into two columns */
+.split-screen {
+  display: flex;
+}
+
+.split-screen > div {
+  flex: 1;
+  padding: 20px;
+}
+
+.split-screen > div:nth-child(1) {
+  border-right: 1px solid #ccc; /* Add border between columns */
+}
+
+td {
+  text-align: center;
+}
+ #signatureCanvas {
+            border: 1px solid #000;
+            cursor: crosshair;
+        }
+</style>
+<body>
+       <div class="header">
+  <h1>GATE PASS</h1>
+</div>
+    <div class="container mt-5 split-screen">
+        <!-- Left side: Form -->
+        <div>
+            <form id="dataForm" action="sampdb.php" method="POST" class="form-container">
+                <label>Name</label>
+                <input type="text" id="fname" name="fname" class="form-control mb-3" placeholder="Enter Name">
+                <label>Age</label>
+                <input type="text" id="age" name="age" class="form-control mb-3" placeholder="Enter Age">
+                <label>Email</label>
+                <input type="email" id="email" name="email" class="form-control mb-3" placeholder="Enter Email">
+                <label>Phone</label>
+                <input type="tel" id="phone" name="phone" class="form-control mb-3" placeholder="Enter Phone">
+                <label>Address</label>
+                <textarea id="address" name="address" class="form-control mb-3" placeholder="Enter Address"></textarea>
+                 <label>Person to Meet</label>
+                <input type="text" id="meet" name="meet" class="form-control mb-3" placeholder="Enter Phone">
+                 <label>In Time</label>
+                <input type="time" id="time" name="time" class="form-control mb-3" placeholder="Enter Phone">
+                 <label>Time Valid</label>
+                <input type="int" id="val" name="val" class="form-control mb-3" placeholder="Enter Phone">
+
+
+
+                <!-- Button to capture photo from webcam -->
+                <button type="button" id="captureBtn" class="btn btn-primary mb-3 float-end">Capture Photo</button>
+                <!-- Hidden input field to store captured image data -->
+                <input type="hidden" name="photo" id="photoData">
+                <button onclick="printBtn()" type="button" id="printBtn" class="btn btn-success mb-3 float-end" style="display:none;">Print</button>
+
+
+       
+            </form>
+        </div>
+        <!-- Right side: Webcam video element and captured photo -->
+        <div>
+            <video id="video" width="500" height="400" style="display:block;"></video>
+            <!-- Canvas element for rendering captured photo -->
+            <canvas id="canvas" width="640" height="480" style="display:none;"></canvas>
+        </div>
+    </div>
+
+    <!-- Bootstrap 5 JS (optional, for some components) -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.min.js"></script>
+
+  <!-- JavaScript for webcam scanning -->
+<script>
+    // Access webcam and capture photo
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+    const captureBtn = document.getElementById('captureBtn');
+    const printBtn = document.getElementById('printBtn');
+    const photoInput = document.getElementById('photoData');
+
+    // Check if webcam access is supported
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(function(stream) {
+                video.srcObject = stream;
+                video.play();
+            })
+            .catch(function(err) {
+                console.error('Error accessing webcam: ', err);
+            });
+    }
+
+    // Capture photo from webcam
+    captureBtn.addEventListener('click', function() {
+        const context = canvas.getContext('2d');
+        context.drawImage(video, 0, 0, 640, 480);
+        // Convert canvas data to base64 image
+        const photoData = canvas.toDataURL('image/jpeg');
+        // Store base64 image data in hidden input field
+        photoInput.value = photoData;
+        // Show print button after capturing photo
+        printBtn.style.display = 'block';
+    });
+
+    // Print captured photo and form details
+    printBtn.addEventListener('click', function() {
+        // Fetch form values
+        const name = document.getElementById('fname').value;
+        const age = document.getElementById('age').value;
+        const email = document.getElementById('email').value;
+        const phone = document.getElementById('phone').value;
+        const address = document.getElementById('address').value;
+        const meet = document.getElementById('meet').value; // Corrected
+        const time = document.getElementById('time').value; // Corrected
+        const val = document.getElementById('val').value; // Corrected
+
+        // Construct HTML content for print view
+        const htmlContent = `
+    <table style="width: 50%; border-collapse: collapse; border: 1px solid black; margin: 0 auto; ">
+        <tr>
+            <td colspan="2" style="text-align: center; border-bottom: 1px solid black;">
+                <p>
+                    <img src="logo.png" style="width: 80px; height: auto; border: 1px solid white; margin-right: 2px; float: left;">
+                    XYZ College<br>
+                    xyz xxx college of arts and science<br>thambaram chennai 600002<br>landmark: abcde
+                </p>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2" style="text-align: center;">
+                <img src="${photoInput.value}" width="80" style="border: 1px solid black; float:right">
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2" style="text-align: center; border-top: 1px solid black;">
+                <h2>Form Details</h2>
+            </td>
+        </tr>
+        <tr>
+            <td style="width: 30%; text-align: right; padding-right: 10px; border-right: 1px solid black;">Name:</td>
+            <td style="padding-left: 10px;">${name}</td>
+        </tr>
+        <tr>
+            <td style="width: 30%; text-align: right; padding-right: 10px; border-right: 1px solid black;">Age:</td>
+            <td style="padding-left: 10px;">${age}</td>
+        </tr>
+        <tr>
+            <td style="width: 30%; text-align: right; padding-right: 10px; border-right: 1px solid black;">Email:</td>
+            <td style="padding-left: 10px;">${email}</td>
+        </tr>
+        <tr>
+            <td style="width: 30%; text-align: right; padding-right: 10px; border-right: 1px solid black;">Phone:</td>
+            <td style="padding-left: 10px;">${phone}</td>
+        </tr>
+        <tr>
+            <td style="width: 30%; text-align: right; padding-right: 10px; border-right: 1px solid black;">Address:</td>
+            <td style="padding-left: 10px;">${address}</td>
+        </tr>
+         <tr>
+            <td style="width: 30%; text-align: right; padding-right: 10px; border-right: 1px solid black;">Person to Meet:</td> <!-- Corrected -->
+            <td style="padding-left: 10px;">${meet}</td>
+        </tr>
+         <tr>
+            <td style="width: 30%; text-align: right; padding-right: 10px; border-right: 1px solid black;">In Time:</td> <!-- Corrected -->
+            <td style="padding-left: 10px;">${time}</td>
+        </tr>
+         <tr>
+            <td style="width: 30%; text-align: right; padding-right: 10px; border-right: 1px solid black;">Time Valid:</td> <!-- Corrected -->
+            <td style="padding-left: 10px;">${val}</td>
+        </tr>
+       
+    </table>
+`;
+
+        // Open print window and write HTML content
+        const printWindow = window.open('', '_blank');
+        printWindow.document.write(htmlContent);
+        printWindow.document.close();
+        // Wait for image to load before printing
+        printWindow.onload = function() {
+            printWindow.print();
+        };
+    });
+</script>
+
+
+
+</body>
+</html>
